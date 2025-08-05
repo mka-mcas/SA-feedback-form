@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motorcycle Safety Feedback</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* All CSS styles from previous solution */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c); color: #fff; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header { text-align: center; margin: 20px 0 40px; width: 100%; max-width: 800px; }
+        .header h1 { font-size: 2.8rem; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .header p { font-size: 1.2rem; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+        .container { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; width: 100%; max-width: 1200px; }
+        .card { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 100%; max-width: 500px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); }
+        .card-title { font-size: 1.8rem; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; color: #ffcc00; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 10px; font-size: 1.1rem; font-weight: 500; }
+        input, textarea { width: 100%; padding: 14px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.25); color: white; font-size: 1rem; transition: border-color 0.3s; }
+        input:focus, textarea:focus { outline: none; border-color: #ffcc00; }
+        textarea { min-height: 120px; resize: vertical; }
+        .rating-container { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
+        .rating-star { font-size: 2.5rem; color: #555; cursor: pointer; transition: transform 0.2s, color 0.2s; }
+        .rating-star:hover { transform: scale(1.2); }
+        .rating-star.active { color: #ffcc00; }
+        .btn { background: linear-gradient(to right, #ffcc00, #ff9900); color: #1a1a2e; border: none; padding: 16px 30px; font-size: 1.2rem; font-weight: 600; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4); }
+        .btn:active { transform: translateY(1px); }
+        .btn.sending { background: linear-gradient(to right, #6c757d, #495057); }
+        .btn.success { background: linear-gradient(to right, #28a745, #1e7e34); }
+        .stats { display: flex; flex-direction: column; gap: 20px; }
+        .stat-card { background: rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-title { font-size: 1.3rem; margin-bottom: 15px; color: #ffcc00; }
+        .average-rating { font-size: 3rem; font-weight: bold; color: #ffcc00; margin: 10px 0; }
+        .ratings-count { font-size: 1.1rem; opacity: 0.9; }
+        .feedback-display { text-align: center; font-style: italic; font-size: 1.2rem; line-height: 1.6; padding: 20px 0; min-height: 120px; display: flex; align-items: center; justify-content: center; }
+        .feedback-author { display: block; margin-top: 15px; font-weight: 500; color: #ffcc00; font-style: normal; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #28a745; color: white; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.3); opacity: 0; transition: all 0.4s ease; z-index: 1000; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .error-message { color: #ff6b6b; margin-top: 10px; font-weight: 500; text-align: center; min-height: 25px; }
+        .motorcycle-icon { font-size: 2rem; margin-right: 10px; }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2.2rem; }
+            .header p { font-size: 1rem; }
+            .card { padding: 20px; }
+            .rating-star { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-motorcycle motorcycle-icon"></i> Motorcycle Safety Feedback</h1>
+        <p>Help us improve our rider safety programs by sharing your experience and suggestions</p>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-comment-alt"></i> Share Your Feedback</h2>
+            
+            <div class="form-group">
+                <label for="nickname">Your Nickname:</label>
+                <input type="text" id="nickname" placeholder="Enter your nickname">
+            </div>
+            
+            <div class="form-group">
+                <label>Rate Your Experience:</label>
+                <div class="rating-container">
+                    <i class="fas fa-star rating-star" data-value="1"></i>
+                    <i class="fas fa-star rating-star" data-value="2"></i>
+                    <i class="fas fa-star rating-star" data-value="3"></i>
+                    <i class="fas fa-star rating-star" data-value="4"></i>
+                    <i class="fas fa-star rating-star" data-value="5"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="feedback">Your Feedback:</label>
+                <textarea id="feedback" placeholder="What did you think about our motorcycle safety program?"></textarea>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <button id="sendButton" class="btn">
+                <i class="fas fa-paper-plane"></i> Send Feedback
+            </button>
+        </div>
+        
+        <div class="card stats">
+            <div class="stat-card">
+                <h3 class="stat-title"><i class="fas fa-chart-line"></i> Average Rating</h3>
+                <div class="average-rating" id="averageRating">4.7</div>
+                <div class="ratings-count" id="ratingsCount">Based on 42 ratings</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3 class="stat-title"><i class="fas fa-comments"></i> Recent Feedback</h3>
+                <div class="feedback-display" id="randomFeedback">
+                    "The intersection awareness training was extremely helpful for urban riding."
+                    <span class="feedback-author">— Rider_42</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">Thank you for your feedback! Your submission was successful.</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const sendButton = document.getElementById('sendButton');
+            const nicknameInput = document.getElementById('nickname');
+            const feedbackInput = document.getElementById('feedback');
+            const errorMessage = document.getElementById('errorMessage');
+            const toast = document.getElementById('toast');
+            const stars = document.querySelectorAll('.rating-star');
+            const averageRatingEl = document.getElementById('averageRating');
+            const ratingsCountEl = document.getElementById('ratingsCount');
+            const randomFeedbackEl = document.getElementById('randomFeedback');
+            
+            let selectedRating = 0;
+            let submissions = JSON.parse(localStorage.getItem('feedbackSubmissions')) || [];
+            
+            // Initialize with sample data if empty
+            if (submissions.length === 0) {
+                submissions = [
+                    { nickname: "RoadWarrior", rating: 5, feedback: "The safety course helped me avoid a collision last week!", createdAt: new Date('2023-06-15') },
+                    { nickname: "BikerChick", rating: 4, feedback: "Great content but need more night riding scenarios.", createdAt: new Date('2023-06-20') },
+                    { nickname: "SafeRider", rating: 5, feedback: "The intersection awareness training was life-saving!", createdAt: new Date('2023-07-01') },
+                    { nickname: "MotoMike", rating: 3, feedback: "Good information but the videos could be more engaging.", createdAt: new Date('2023-07-10') },
+                    { nickname: "GearHead", rating: 5, feedback: "I've been riding for 20 years and still learned new techniques.", createdAt: new Date('2023-07-18') }
+                ];
+                localStorage.setItem('feedbackSubmissions', JSON.stringify(submissions));
+            }
+            
+            // Initialize display
+            updateStats();
+            
+            // Star rating functionality
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const value = parseInt(star.getAttribute('data-value'));
+                    selectedRating = value;
+                    
+                    // Update star display
+                    stars.forEach((s, index) => {
+                        if (index < value) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                });
+            });
+            
+            // Submit feedback
+            sendButton.addEventListener('click', function() {
+                // Reset error message
+                errorMessage.textContent = '';
+                
+                // Get values
+                const nickname = nicknameInput.value.trim();
+                const feedback = feedbackInput.value.trim();
+                
+                // Validation
+                if (!nickname) {
+                    showError("Please enter a nickname");
+                    return;
+                }
+                
+                if (selectedRating === 0) {
+                    showError("Please select a rating");
+                    return;
+                }
+                
+                if (!feedback) {
+                    showError("Please enter your feedback");
+                    return;
+                }
+                
+                // Disable button and show loading state
+                sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                sendButton.classList.add('sending');
+                sendButton.disabled = true;
+                
+                // Simulate server request
+                setTimeout(() => {
+                    // Create submission
+                    const submission = {
+                        nickname: nickname,
+                        rating: selectedRating,
+                        feedback: feedback,
+                        createdAt: new Date()
+                    };
+                    
+                    // Add to submissions
+                    submissions.push(submission);
+                    localStorage.setItem('feedbackSubmissions', JSON.stringify(submissions));
+                    
+                    // Update UI
+                    updateStats();
+                    
+                    // Reset form
+                    nicknameInput.value = '';
+                    feedbackInput.value = '';
+                    selectedRating = 0;
+                    stars.forEach(star => star.classList.remove('active'));
+                    
+                    // Show success
+                    sendButton.innerHTML = '<i class="fas fa-check"></i> Success!';
+                    sendButton.classList.remove('sending');
+                    sendButton.classList.add('success');
+                    
+                    // Show toast notification
+                    showToast();
+                    
+                    // Reset button after delay
+                    setTimeout(() => {
+                        sendButton.innerHTML = '<i class="fas fa-paper-plane"></i> Send Feedback';
+                        sendButton.classList.remove('success');
+                        sendButton.disabled = false;
+                    }, 3000);
+                }, 1000);
+            });
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+            }
+            
+            function showToast() {
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+            
+            function updateStats() {
+                // Calculate average rating
+                if (submissions.length > 0) {
+                    const total = submissions.reduce((sum, item) => sum + item.rating, 0);
+                    const average = total / submissions.length;
+                    averageRatingEl.textContent = average.toFixed(1);
+                    ratingsCountEl.textContent = `Based on ${submissions.length} ratings`;
+                    
+                    // Show random feedback
+                    const randomIndex = Math.floor(Math.random() * submissions.length);
+                    const randomItem = submissions[randomIndex];
+                    randomFeedbackEl.innerHTML = `"${randomItem.feedback}" <span class="feedback-author">— ${randomItem.nickname}</span>`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
